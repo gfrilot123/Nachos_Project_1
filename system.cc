@@ -111,23 +111,38 @@ int commandUsed = FALSE;
 	    randomYield = TRUE;
 	    argCount = 2;
 	}else if(!strcmp(*argv, "-A")){
-      if(atoi(*(argv + 1)) == 1)
+      int num = atoi(*(argv + 1));
+      switch(num)
       {
-        myMenuOption = 1;
-        commandUsed = TRUE;
-      }else if(atoi(*(argv + 1)) == 2)
-      {
-        commandUsed = TRUE;
-        myMenuOption = 2;
-      }else
-      {
-        printf("Invalid input\n");
+        case 1:
+          myMenuOption = 1;
+          commandUsed = TRUE;
+        break;
+
+        case 2:
+          myMenuOption = 2;
+          commandUsed = TRUE;
+        break;
+
+        case 3:
+          myMenuOption = 3;
+          commandUsed = TRUE;
+        break;
+
+        case 4:
+          myMenuOption = 4;
+          commandUsed = TRUE;
+        break;
+
+        default:
+          printf("Invalid input\n");
+        break;
       }
       argCount = 2;
-  }else if(commandUsed == FALSE)
-  {
-    printf("-A command not used shutting down Nachos\n");
-  }
+      if(commandUsed == FALSE)
+          printf("-A command not used shutting down Nachos\n");
+    }
+
 #ifdef USER_PROGRAM
 	if (!strcmp(*argv, "-s"))
 	    debugUserProg = TRUE;
