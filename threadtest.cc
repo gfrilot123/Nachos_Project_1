@@ -1,309 +1,171 @@
-// threadtest.cc
-//	Simple test case for the threads assignment.
-//
-//	Create two threads, and have them context switch
-//	back and forth between themselves by calling Thread::Yield,
-//	to illustratethe inner workings of the thread system.
-//
-// Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation
-// of liability and disclaimer of warranty provisions.
-
 #include "copyright.h"
 #include "system.h"
-
-
-//----------------------------------------------------------------------
-// SimpleThread
-// 	Loop 5 times, yielding the CPU to another ready thread
-//	each iteration.
-//
-//	"which" is simply a number identifying the thread, for debugging
-//	purposes.
-//----------------------------------------------------------------------
-
-void
-SimpleThread(int which)
+#include "thread.h"
+#include "list.h"
+#include <string>
+#include <iostream>
+using namespace std;
+//*****************     AUTHOR: GERALD FRILOT  *********************************
+//*************************MESSAGE ARRAY
+char* randomMsg[100]={"Are you feeling ok?","I am ready for the weekend!",
+"Obsessive Writing Disorder!","Want to be pen pals?"};
+//*************GLOBAL VARIABLES
+int people,mailboxes,Messages;
+int messageSent=0;
+int goal;
+bool wait=false;
+Thread *globalThread= new  Thread("Array Fork");
+Thread **mb;
+//************MAILBOX STRUCT DEFINED HERE
+typedef struct Mailbox
 {
-    int num;
+int myName;
+int from[100];
+int to=0;
+int messageSentCount=0;
+bool waiting=false;
+int capacity;
+char* arrays[4000];
 
-    for (num = 0; num < 5; num++) {
-	      printf("*** thread %d looped %d times\n", which, num);
+Mailbox(int name)
+{
+myName=name;
+int from[100];
+int to=0;
+int messageSentCount=0;
+bool waiting=false;
+int capacity;
+char* arrays[4000];
+}
+}Mailbox;
 
-          currentThread->Yield();
-    }
+//**********PROTOTYPE METHOD DECLARATION
+void postOffice_Simulation(int any);
+void constructMailBox(int numberOfMailboxes);
+void enterPostOffice(int howmany);
+void actionTime(int forkEntrance);
+void readingTime(int messagesToRead);
+
+//****************MAILBOX POINTER
+struct Mailbox **mailboxPointer;
+
+//*****************GET USER INPUT
+
+void postOffice_Simulation(int any)
+{
+cout<<"How many people entering the post office simulation? ";
+cin>>people;
+cout<<"How many messages can each mailbox hold? ";
+cin>>mailboxes;
+cout<<"How many messages are being delivered? ";
+cin>>Messages;
+cout<<"\n";
+goal=people*Messages;
+constructMailBox(people);
+enterPostOffice(people);
+}
+
+//*******CREATES AN ARRAY OF MAILBOX POINTERS
+void constructMailBox(int numberOfMailboxes)
+{
+mailboxPointer=new struct Mailbox*[numberOfMailboxes];
+int count=0;
+for(int i = 0; i<numberOfMailboxes;i++)
+{
+  mailboxPointer[i]=new struct Mailbox::Mailbox(count);
+  count++;
+}
 
 }
 
-/*
-InputTest
-Is a void function that takes input from the user and determines the type of input.
-For example an input of "5" would be an integer. While an input of "abc" is an array of characters.
-The max input size is 1024 characters.
-To check this a flag is set if certain parameters are met.
-Is there is a number it is flagged as an integer.
-If there is a negative sign at the from it is flagged negative.
-If there is only one decimal point it is flagged as a decimal. If there is two it is flagged as a string.
-All other cases default to a character string.
-*/
-void
-InputTest(int a)
+//******METHOD THAT CREATES AN ARRAY OF POINTERS
+void enterPostOffice(int howmany)
 {
-    printf("Enter an input with a max size of 1024: ");
-
-    char userInput[1025];
-    fgets(userInput, 1025, stdin);
-
-    printf("Input is: %s\n", userInput);
-
-    int count = 0;
-
-    // Flags if input can be negative
-    bool isNegative = FALSE;
-    // Flags if input can be an integer
-    bool isInt = FALSE;
-    // Flags if input can be a decimal
-    bool isDec = FALSE;
-    // checks if a period char has bee used already
-    bool decPeriod = FALSE;
-    // Flags if input is a String
-    bool isString = FALSE;
-
-    if(userInput[0] == '-')
-    {
-      isNegative = TRUE;
-      count++;
-    }
-
-    while('\0' != userInput[count])
-    {
-      //Checks if current character is a digit
-      if(userInput[count] == '0' || userInput[count] == '1' || userInput[count] == '2' || userInput[count] == '3' || userInput[count] == '4' || userInput[count] == '5'
-      || userInput[count] == '6' || userInput[count] == '7' || userInput[count] == '8' || userInput[count] == '9')
-      {
-        isInt = TRUE;
-      }
-      // Checks if there has been a digit used adn if there has already been a period
-      else if(userInput[count] == '.' && isInt && decPeriod != TRUE)
-      {
-
-        decPeriod = TRUE;
-        isDec = TRUE;
-
-        // Handles the edge case of a sequence of number folllowed by a period
-        if(userInput[count+1] == '\n')
-        {
-          isString = TRUE;
-        }
-
-      //Removes the new line from being counted and marking all other symbols as a string
-      }else if(userInput[count] != '\n')
-      {
-        isString = TRUE;
-      }
-
-      count++;
-    }
-
-    //Prints to console what type of input the user typed depending on flags set
-    if(isInt && isNegative != TRUE && isDec != TRUE && isString != TRUE)
-    {
-      printf("This is a integer\n");
-    }else if(isInt && isNegative && isDec != TRUE && isString != TRUE)
-    {
-      printf("This is a negative integer\n");
-    }else if(isInt && isNegative != TRUE && isDec && isString != TRUE)
-    {
-      printf("This is a decimal\n");
-    }else if(isInt && isNegative && isDec && isString != TRUE)
-    {
-      printf("This is a negative decimal\n");
-    }else
-    {
-      printf("This is a character string\n");
-    }
-
-    //Debugger code to see if flags set properly
-    //printf("%d%d%d%d\n", isInt, isNegative, isDec, isString);
-
+mb= new Thread*[howmany];
+char id[howmany];
+for(int i =0;i<howmany;i++)
+{
+  id[i]=(char)i;
+  mb[i]=new Thread((id));
+}
+//*******FORK THE NEXT METHOD FOR GUEST ENTRY
+globalThread->Fork(actionTime,howmany);
 }
 
-// Global variable to track the number of shouts per thread
-int numShoutsGlobal;
-
-/*
-Shout
-When called by a thread it randomly shouts based on the number of threads ands how many shouts.
-Then it yields that thread in a buffer 2-5 times to allow other threads to shout.
-*/
-void Shout(int a)
+//*******BEGIN ENTERING THE POST OFFICE
+void actionTime(int forkEntrance)
 {
-  for(int x = 0; x < numShoutsGlobal; x++){
-
-    //Randomly picks one of five shouts to use
-    int shout = (Random()%5);
-    switch(shout)
-    {
-      case 0:
-      printf("%d Shout\n", a);
-      break;
-      case 1:
-      printf("%d Let it all out\n", a);
-      break;
-      case 2:
-      printf("%d These are the things I can do without\n", a);
-      break;
-      case 3:
-      printf("%d I'm talking to you\n", a);
-      break;
-      case 4:
-      printf("%d Come on\n", a);
-      break;
-    }
-
-    // Randomly picks the amount of time the currentThread will buffer (between 2-5).
-    int num = (Random()%5)+1;
-    if(num < 2)
-    {
-      num = (Random()%5)+1;
-    }
-
-    for(int x = 0; x < num; x++)
-    {
-      currentThread->Yield();
-    }
-
-  }
+for(int i =0; i< forkEntrance;i++)
+  {cout<<"Guest "<<(int)mb[i]<<" has entered the post office."<<"\n";}
+  mb[0]->Fork(readingTime,people);
 }
 
-/*
-ThreadShout
-Based on user input passed to it this function creates that many threads and set the global number of shouts.
-Then Forks each thread to the shout function and passes its name as an int.
-*/
-void ThreadShout(int numThread, int numShout)
+//******MAIN POSTOFFICE SIMULATION METHOD
+void readingTime(int messagesToRead)
 {
-    Thread* t;
-    char id[2];
-    numShoutsGlobal = numShout;
-
-    // Creates a new thread based on user input and Forks it to shout
-    for(int x = 0; x < numThread; x++)
-    {
-        id[0] = (char)x;
-        t = new Thread(id);
-        t->Fork(Shout,x);
-    }
-
-}
-
-/*
-ThreadShoutInput
-A function that is called by a thread and verifies user input to create a thread shouting match.
-This verifies user input is between numbers 1-10,000.
-This then call a function passing the users values and creates threads that shout that many times.
-*/
-void ThreadShoutInput(int a)
+int i;
+while(messageSent < goal)
 {
-  // Ask for user inputs
-  printf("Enter the numeber of threads you wish to make (1 to 10,000 max): ");
-
-  // Stores user input and stores it in memory as a character array and an integer value
-  // Gets the input for the number of Threads
-  char userInput[1025];
-  fgets(userInput, 1025, stdin);
-  int count = 0;
-  int userNumThread = atoi(userInput);
-
-  // Checks if the user is input a valid input
-  while('\0' != userInput[count] && '\n' != userInput[count])
+  for(i=0; i<people;i++)
   {
-    if(userInput[count] == '0' || userInput[count] == '1' || userInput[count] == '2' || userInput[count] == '3' || userInput[count] == '4' || userInput[count] == '5'
-    || userInput[count] == '6' || userInput[count] == '7' || userInput[count] == '8' || userInput[count] == '9')
+    cout<<"Guest "<<(int)mb[i]<<" is checking his mailbox. \n";
+    if(Mailbox(i).arrays[i]==NULL)
     {
-      count++;
-    }else
-    {
-      printf("Not a valid input.\n");
-      printf("Enter the numeber of threads you wish to make (1 to 10,000 max): ");
-      fgets(userInput, 1025, stdin);
-      userNumThread = atoi(userInput);
-      count = 0;
+      cout<<"Guest mailbox "<<(int)mb[i]<<" is empty."<<"\n";
     }
-
-    if(userNumThread > 10000 || userNumThread < 1)
+    else if (!Mailbox(i).arrays[i]==NULL)
     {
-      printf("Not a valid input.\n");
-      printf("Enter the numeber of threads you wish to make (1 to 10,000 max): ");
-      fgets(userInput, 1025, stdin);
-      userNumThread = atoi(userInput);
-      count = 0;
+    cout<<"Guest "<<(int)mb[i]<<" has mail !: "<<Mailbox(i).arrays[i];
+    cout<<"from: "<<Mailbox(i).from[i]<<"\n";
+    Mailbox(i).arrays[i]=NULL;
+
+    while(Mailbox(i).arrays[i]!=NULL)
+    {
+      cout<<Mailbox(i).arrays[i++]<<"\n";
+      Mailbox(i).arrays[i++]=NULL;
     }
   }
+}
 
-  // Gets the input for the number of shouts
-    printf("Enter the number of shouts per thread (1 to 10,000): ");
-    fgets(userInput, 1025, stdin);
-    int userNumShout = atoi(userInput);
-    count = 0;
+for (int j=0;j<people;j++)
+  {
+    int ID=((int)mb[j]);
+    if(Mailbox(1).capacity==Messages)
+    {goto wait;}
+        else
+        {
+        int randomPerson=Random()%people;
+        int randomMessage=Random()%4;
+        if(j==randomPerson && randomPerson < people)
+        {randomPerson++;}
+        cout<<"Guest "<<(int)mb[j]<<" writes to Guest => "<<(int)mb[randomPerson]<<
+        ": "<<randomMsg[randomMessage]<<"\n\n";
+        Mailbox(randomPerson).arrays[j]=randomMsg[randomMessage];
+        int ID=((int)mb[j]);
+        Mailbox(randomPerson).from[randomPerson]=ID;
 
-      while('\0' != userInput[count] && '\n' != userInput[count])
-      {
-        if(userInput[count] == '0' || userInput[count] == '1' || userInput[count] == '2' || userInput[count] == '3' || userInput[count] == '4' || userInput[count] == '5'
-        || userInput[count] == '6' || userInput[count] == '7' || userInput[count] == '8' || userInput[count] == '9')
-        {
-          count++;
-        }else
-        {
-          printf("Not a valid input.\n");
-          printf("Enter the number of shouts per thread (1 to 10,000): ");
-          fgets(userInput, 1025, stdin);
-          userNumShout = atoi(userInput);
-          count = 0;
+cout<<"*************"<<(int)mb[j]<<" is leaving the post office.*********** \n\n";
+messageSent++;
+cout<<"-------------------------------------------------------------------\n";
+cout<<" Total messages to be delivered: "<<goal<<" \n";
+cout<<" Messages delivered: "<<messageSent<<" \n";
+cout<<"--------------------------------------------------------------------\n\n";
         }
-
-        if(userNumShout > 10000 || userNumShout < 1)
-        {
-          printf("Not a valid input.\n");
-          printf("Enter the number of shouts per thread (1 to 10,000): ");
-          fgets(userInput, 1025, stdin);
-          userNumShout = atoi(userInput);
-          count = 0;
-        }
+cout<<"               "<<(int)mb[j]<<" is entering the postoffice.\n";
+    }
+wait:
+      for(int a =0; a<7; a++)
+      {currentThread->Yield();}
       }
-      
-      ThreadShout(userNumThread,userNumShout);
-}
+  }
 
-void ThreadPick(int a)
-{
-
-}
-
-//----------------------------------------------------------------------
-// ThreadTest
-// 	Invoke a test routine.
-//----------------------------------------------------------------------
+//**********MAIN METHOD
 
 void
 ThreadTest()
 {
-    DEBUG('t', "Entering ThreadTest");
-
-    Thread* t = new Thread("forked thread");
-    t->Fork(SimpleThread, 1);
-    SimpleThread(0);
-
-
-
-    if(myMenuOption == 1)
-    {
-      Thread* inputThread = new Thread("input thread");
-      inputThread->Fork(InputTest, 1);
-    }else if(myMenuOption == 2)
-    {
-      Thread* shoutInput = new Thread("shout input");
-      shoutInput->Fork(ThreadShoutInput, 1);
-    }
-
+Thread *postofficeThread;
+postofficeThread = new Thread("user input");
+postofficeThread->Fork(postOffice_Simulation,1);
+DebugInit("user input");
 }
