@@ -321,7 +321,6 @@ void ThreadPick(int a)
 {
 
 }
-
 //----------------------Code by Chau Cao---------------------------
 //possValidation
 //helper function to evaluate user inputType
@@ -382,9 +381,15 @@ int possInputEval(char *input) {
 //increments total messages read for debugging purposes
 //decrements current mail counter
 void possRead(int identifier) {
+  mailboxSemaphore[identifier]->P();
+  printf("--Person %d claims mailboxSemaphore[%d]\n", identifier, identifier);
   poss.messagesRead++;
   printf("---Person %d reads the %dth message: %s sent by Person %d --- %d messages have been read\n", identifier, poss.mailCount[identifier]- 1, poss.mailbox[poss.mailCount[identifier]-1][identifier].message, poss.mailbox[poss.mailCount[identifier]-1][identifier].sender, poss.messagesRead);
   poss.mailCount[identifier]--;
+  freeSpaceSemaphore[identifier]->V();
+  printf("----Person %d releases and increases freeSpaceSemaphore[%d] by 1\n", identifier, identifier);
+  mailboxSemaphore[identifier]->V();
+  printf("-----Person %d releases mailboxSemaphore[%d]\n", identifier, identifier);
 }
 
 //possCheckMail
@@ -395,13 +400,7 @@ void possRead(int identifier) {
 void possCheckMail(int identifier) {
   printf("-Person %d checks - has %d letters in mailbox\n", identifier, poss.mailCount[identifier]);
   while(poss.mailCount[identifier] > 0) {
-    mailboxSemaphore[identifier]->P();
-    printf("--Person %d claims mailboxSemaphore[%d]\n", identifier, identifier);
     possRead(identifier);
-    freeSpaceSemaphore[identifier]->V();
-    printf("----Person %d releases and increases freeSpaceSemaphore[%d] by 1\n", identifier, identifier);
-    mailboxSemaphore[identifier]->V();
-    printf("-----Person %d releases mailboxSemaphore[%d]\n", identifier, identifier);
     printf("------Person %d yields after a read\n", identifier);
     currentThread->Yield();
   }
