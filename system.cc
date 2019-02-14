@@ -93,7 +93,8 @@ Initialize(int argc, char **argv)
     int netname = 0;		// UNIX socket name
 #endif
 
-int commandUsed = FALSE;
+int commandUsed = TRUE;
+int menu;
 
     for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
 	argCount = 1;
@@ -111,17 +112,40 @@ int commandUsed = FALSE;
 	    randomYield = TRUE;
 	    argCount = 2;
 	}else if(!strcmp(*argv, "-A")){
-      if(atoi(*(argv + 1)) == 1)
+
+      menu = atoi(*(argv + 1));
+
+      switch(menu)
       {
-        myMenuOption = 1;
-        commandUsed = TRUE;
-      }else if(atoi(*(argv + 1)) == 2)
-      {
-        commandUsed = TRUE;
-        myMenuOption = 2;
-      }else
-      {
-        printf("Invalid input\n");
+        case 1:
+          myMenuOption = 1;
+        break;
+
+        case 2:
+          myMenuOption = 2;
+        break;
+
+        case 3:
+          myMenuOption = 3;
+        break;
+
+        case 4:
+          myMenuOption = 4;
+        break;
+
+        case 5:
+          myMenuOption = 5;
+        break;
+
+        case 6:
+          myMenuOption = 6;
+        break;
+
+        default:
+          printf("Invalid input\n");
+          commandUsed = FALSE;
+        break;
+
       }
       argCount = 2;
   }else if(commandUsed == FALSE)
