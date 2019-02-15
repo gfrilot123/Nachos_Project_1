@@ -903,7 +903,7 @@ int* statePhiloGlobal;
 // Semaphore to block multiple philosophers from picking up chopsticks at the same time
 Semaphore* mutexGlobal = new Semaphore("lock",1);
 // Semaphore array for the chopsticks
-Semaphore* semChopsticksGlobal;
+Semaphore** semChopsticksGlobal;
 
 void PhiloSem(int a)
 {
@@ -939,25 +939,64 @@ void PhiloSem(int a)
   {
     if(!finished)
     {
-      printf("Philosopher %d would like to eat.\n", a);
-      printf("Philosopher %d ask the waiter if they can pick up chopsticks.\n", a);
       //printf("---Philosopher %d's Left: %d, Right: %d\n", a, chopsticksGlobal[a], chopsticksGlobal[modPhilos]);
-      mutexGlobal->P();
-      //semChopsticksGlobal[a].P();
-      printf("Philosopher %d looks to their left...\n", a);
-      printf("Philosopher %d's left chopstick is available.\n", a);
-      //semChopsticksGlobal[modPhilos].P();
-      printf("Philosopher %d looks to their right...\n", a);
-      printf("Philosopher %d's right chopstick is available.\n", a);
-      printf("Philosopher %d grabs the left chopstick\n", a);
-      printf("Philosopher %d grabs the right chopstick\n", a);
-
       if(finished == TRUE)
       {
         printf("There are no more meals to eat.\n");
         break;
       }
+      /*
+      else
+      {
+        printf("However there is no more food to eat.\n");
+        break;
+      }
+      */
+      printf("Philosopher %d would like to eat.\n", a);
+      printf("Philosopher %d ask the waiter if they can pick up chopsticks.\n", a);
+      mutexGlobal->P();
+      if(mealsEaten < numMealGlobal)
+      {
+        semChopsticksGlobal[a]->P();
+        printf("Philosopher %d looks to their left...\n", a);
+        printf("Philosopher %d's left chopstick is available.\n", a);
+        semChopsticksGlobal[modPhilos]->P();
+        printf("Philosopher %d looks to their right...\n", a);
+        printf("Philosopher %d's right chopstick is available.\n", a);
 
+        printf("Philosopher %d grabs the left chopstick\n", a);
+        printf("Philosopher %d grabs the right chopstick\n", a);
+        printf("Philosopher %d begins eating.\n", a);
+        mealsEaten++;
+        printf("Total Meals Served: %d/%d\n", mealsEaten, numMealGlobal);
+
+        for(int i = 0; i < eatCycle; i++)
+        {
+          printf("Philosopher %d is eating...\n", a);
+          currentThread->Yield();
+        }
+        printf("Philosopher %d has finished eating.\n", a);
+
+        if(mealsEaten == numMealGlobal)
+        {
+          finished = TRUE;
+        }
+        printf("Philosopher %d begins to set the chopsticks down.\n", a);
+        semChopsticksGlobal[a]->V();
+        semChopsticksGlobal[modPhilos]->V();
+      }
+      mutexGlobal->V();
+
+      isThinking++;
+      for(int j = 0; j < thinkCycle; j++)
+      {
+        printf("Philosopher %d is thinking...\n", a);
+        currentThread->Yield();
+      }
+      isThinking--;
+      printf("Philosopher %d has finished thinking and returns to the table.\n", a);
+
+      /*
       if(mealsEaten < numMealGlobal)
       {
         printf("Philosopher %d begins eating.\n", a);
@@ -991,8 +1030,7 @@ void PhiloSem(int a)
         printf("However there is no more food to eat.\n");
         break;
       }
-
-      mutexGlobal->V();
+      */
     }
   }
   printf("Philosopher %d prepares to leave.\n", a);
@@ -1033,7 +1071,7 @@ void ThreadPhilo(int numPhilo, int numMeal, int a)
       philoState[r] = 0;
     }
     chopsticksGlobal = chopsticks;
-    semChopsticksGlobal = semChopsticks[0];
+    semChopsticksGlobal = semChopsticks;
     for(int r = 0; r < numPhilo; r++)
     {
       printf("%d\n",semChopsticksGlobal[(r+1)%numPhilo]);
