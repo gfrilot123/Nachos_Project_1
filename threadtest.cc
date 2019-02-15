@@ -355,7 +355,7 @@ void postOfficeSimSem(int identifier) {
 }
 //---------------------- End Code by Chau Cao---------------------------
 
-//*****************     AUTHOR: GERALD FRILOT  *********************************
+//*****************     AUTHOR: GERALD FRILOT - BEGIN CODE *********************************
 //*************************MESSAGE ARRAY
 char* randomMsg[100]={"Are you feeling ok?","I am ready for the weekend!",
 "Obsessive Writing Disorder!","Want to be pen pals?"};
@@ -370,22 +370,22 @@ Thread **mb;
 typedef struct Mailbox
 {
 int myName;
-int from[100];
+int from[11000];
 int to=0;
 int messageSentCount=0;
 bool waiting=false;
 int capacity;
-char* arrays[4000];
+char* arrays[11000];
 
 Mailbox(int name)
 {
 myName=name;
-int from[100];
+int from[11000];
 int to=0;
 int messageSentCount=0;
 bool waiting=false;
 int capacity;
-char* arrays[4000];
+char* arrays[11000];
 }
 }Mailbox;
 
@@ -508,7 +508,7 @@ wait:
       {currentThread->Yield();}
       }
   }
-
+//*****************     AUTHOR: GERALD FRILOT - END CODE *********************************
 
 /*
 InputTest
