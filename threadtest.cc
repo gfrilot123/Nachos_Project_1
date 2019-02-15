@@ -957,19 +957,25 @@ void PhiloSem(int a)
       mutexGlobal->P();
       if(mealsEaten < numMealGlobal)
       {
+        // Wait for the left chopstick
         semChopsticksGlobal[a]->P();
         printf("Philosopher %d looks to their left...\n", a);
         printf("Philosopher %d's left chopstick is available.\n", a);
+        // Wait for the right chopstick
         semChopsticksGlobal[modPhilos]->P();
         printf("Philosopher %d looks to their right...\n", a);
         printf("Philosopher %d's right chopstick is available.\n", a);
-
         printf("Philosopher %d grabs the left chopstick\n", a);
         printf("Philosopher %d grabs the right chopstick\n", a);
         printf("Philosopher %d begins eating.\n", a);
+
+        // Signal the waiter to let the next philosopher pick up chopsticks
+        mutexGlobal->V();
+        // Increment the global number of meals available
         mealsEaten++;
         printf("Total Meals Served: %d/%d\n", mealsEaten, numMealGlobal);
 
+        // Busy waiting loop for the philosopher to eat
         for(int i = 0; i < eatCycle; i++)
         {
           printf("Philosopher %d is eating...\n", a);
@@ -977,62 +983,34 @@ void PhiloSem(int a)
         }
         printf("Philosopher %d has finished eating.\n", a);
 
+        // Flags if there is no more food
         if(mealsEaten == numMealGlobal)
         {
           finished = TRUE;
         }
-        printf("Philosopher %d begins to set the chopsticks down.\n", a);
-        semChopsticksGlobal[a]->V();
-        semChopsticksGlobal[modPhilos]->V();
-      }
-      mutexGlobal->V();
 
+      }
+      printf("Philosopher %d begins to set the chopsticks down.\n", a);
+      // Signal the left chopstick is available
+      semChopsticksGlobal[a]->V();
+      // Signal if right shopstick is available
+      semChopsticksGlobal[modPhilos]->V();
+
+      // Increment the number of philosophers that are thinking
       isThinking++;
+      // Loop to let the philosopher think
       for(int j = 0; j < thinkCycle; j++)
       {
         printf("Philosopher %d is thinking...\n", a);
         currentThread->Yield();
       }
+      // Decrement the number of philosophers that are done thinking
       isThinking--;
       printf("Philosopher %d has finished thinking and returns to the table.\n", a);
-
-      /*
-      if(mealsEaten < numMealGlobal)
-      {
-        printf("Philosopher %d begins eating.\n", a);
-        mealsEaten++;
-        printf("Total Meals Served: %d/%d\n", mealsEaten, numMealGlobal);
-        for(int i = 0; i < eatCycle; i++)
-        {
-          printf("Philosopher %d is eating...\n", a);
-          currentThread->Yield();
-        }
-        printf("Philosopher %d has finished eating.\n", a);
-        if(mealsEaten == numMealGlobal)
-        {
-          finished = TRUE;
-        }
-        printf("Philosopher %d begins to set the chopsticks down.\n", a);
-        //semChopsticksGlobal[a].V();
-        //semChopsticksGlobal[modPhilos].V();
-
-        isThinking++;
-        for(int j = 0; j < thinkCycle; j++)
-        {
-          printf("Philosopher %d is thinking...\n", a);
-          currentThread->Yield();
-        }
-        isThinking--;
-        printf("Philosopher %d has finished thinking and returns to the table.\n", a);
-      }
-      else
-      {
-        printf("However there is no more food to eat.\n");
-        break;
-      }
-      */
     }
   }
+
+// Loop to wait for all philosopher to leave
   printf("Philosopher %d prepares to leave.\n", a);
   if(isThinking == 0)
   {
@@ -1056,6 +1034,7 @@ void PhiloSem(int a)
 
 void ThreadPhilo(int numPhilo, int numMeal, int a)
 {
+    // Creates an array of chopsticks for both busy and semaphore versions
     Thread* t;
     char id[2];
     numMealGlobal = numMeal;
@@ -1105,7 +1084,7 @@ void PhilosophersInput(int a)
   int numPhilos = 0;
   int numMeals = 0;
 
-  printf("Enter the number of philosophers: ");
+  printf("Enter the number of philosophers (2 to 10000): ");
   fgets(userInput, 1025, stdin);
   numPhilos = atoi(userInput);
   // Begin code added by Joseph Aucoin
@@ -1120,23 +1099,24 @@ void PhilosophersInput(int a)
     }else
     {
       printf("Invalid input\n");
-      printf("Enter the number of philosophers: ");
+      printf("Enter the number of philosophers (2 to 10000): ");
       fgets(userInput, 1025, stdin);
       numPhilos = atoi(userInput);
       count = 0;
     }
 
-    if(numPhilos > 10000 || numPhilos < 1)
+    if(numPhilos > 10000 || numPhilos < 2)
     {
       printf("Invalid input\n");
-      printf("Enter the number of philosophers: ");
+      printf("Enter the number of philosophers (2 to 10000): ");
       fgets(userInput, 1025, stdin);
       numPhilos = atoi(userInput);
       count = 0;
     }
   }
   // End code added by Joseph Aucoin
-  printf("\nEnter the total number of meals that must be eaten: ");
+  // Number of meals is arbitrairy and only exit to stop the user from asking an unreasonable amount
+  printf("\nEnter the total number of meals that must be eaten (Max 10000): ");
   fgets(userInput, 1025, stdin);
   numMeals = atoi(userInput);
   // Begin code added by Joseph Aucoin
@@ -1151,16 +1131,16 @@ void PhilosophersInput(int a)
     }else
     {
       printf("Invalid input\n");
-      printf("Enter the number of meals: ");
+      printf("Enter the number of meals (Max 10000): ");
       fgets(userInput, 1025, stdin);
       numMeals = atoi(userInput);
       count = 0;
     }
 
-    if(numPhilos > 10000 || numPhilos < 1)
+    if(numMeals > 10000 || numMeals < 1)
     {
       printf("Invalid input\n");
-      printf("Enter the number of meals: ");
+      printf("Enter the number of meals (Max 10000): ");
       fgets(userInput, 1025, stdin);
       numMeals = atoi(userInput);
       count = 0;
