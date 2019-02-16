@@ -370,22 +370,22 @@ Thread **mb;
 typedef struct Mailbox
 {
 int myName;
-int from[11000];
+int from[10500];
 int to=0;
 int messageSentCount=0;
 bool waiting=false;
 int capacity;
-char* arrays[11000];
+char* arrays[10500];
 
 Mailbox(int name)
 {
 myName=name;
-int from[11000];
+int from[10500];
 int to=0;
 int messageSentCount=0;
 bool waiting=false;
 int capacity;
-char* arrays[11000];
+char* arrays[10500];
 }
 }Mailbox;
 
