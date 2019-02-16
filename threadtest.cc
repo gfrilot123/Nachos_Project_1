@@ -503,7 +503,7 @@ for(int i =0; i< forkEntrance;i++)
 void readingTime(int messagesToRead)
 {
 int i;
-while(messageSent < goal)
+while(messageSent < goal && wait==false)
 {
   for(i=0; i<people;i++)
   {
@@ -530,7 +530,11 @@ for (int j=0;j<people;j++)
   {
     int ID=((int)mb[j]);
     if(Mailbox(1).capacity==Messages)
-    {goto wait;}
+    {
+	    wait=true;
+	    goto waits;
+    
+    }
         else
         {
         int randomPerson=Random()%people;
@@ -552,9 +556,10 @@ cout<<"--------------------------------------------------------------------\n\n"
         }
 cout<<"               "<<(int)mb[j]<<" is entering the postoffice.\n";
     }
-wait:
+waits:
       for(int a =0; a<7; a++)
       {currentThread->Yield();}
+	wait=false;
       }
   }
 //*****************     AUTHOR: GERALD FRILOT - END CODE *********************************
