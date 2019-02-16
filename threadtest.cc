@@ -403,13 +403,62 @@ struct Mailbox **mailboxPointer;
 
 void postOffice_Simulation(int any)
 {
+int validCounter=1;
+do{
+
 cout<<"How many people entering the post office simulation? ";
 cin>>people;
+cin.clear();
+}while(validCounter<1 &&people>0 && people<10001);
+cout<<"You've entered "<<people<<"\n";
+
+if (people>0 && people <10001)
+goto next;
+else
+{
+	cout<<"Invalid entry! \n";
+	return;
+}
+
+ 
+next:
+do{
 cout<<"How many messages can each mailbox hold? ";
 cin>>mailboxes;
+cin.clear();
+}while(validCounter<1 &&mailboxes>0 && mailboxes<10001);
+cout<<"You've entered "<<mailboxes <<"\n";
+
+if (mailboxes>0 && mailboxes <10001)
+goto nextOne;
+else
+{
+	cout<<"Invalid entry! \n";
+	return;
+}
+
+
+nextOne:
+
+do{
 cout<<"How many messages are being delivered? ";
 cin>>Messages;
-cout<<"\n";
+cin.clear();
+
+}while(validCounter<1 && Messages >0 && Messages <10001);
+cout<<"You've entered "<<Messages <<"\n";
+
+
+if (Messages>0 && Messages <10001)
+goto nextOver;
+else
+{
+	cout<<"Invalid entry! \n";
+	return;
+}
+
+
+nextOver:
 goal=people*Messages;
 constructMailBox(people);
 enterPostOffice(people);
