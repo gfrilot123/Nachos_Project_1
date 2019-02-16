@@ -1245,7 +1245,7 @@ ThreadTest()
       Thread *postofficeThread;
       postofficeThread = new Thread("user input");
       postofficeThread->Fork(postOffice_Simulation,1);
-      DebugInit("user input");
+      //DebugInit("user input");
     }else if(myMenuOption == 6)
     {
       Thread* postOfficeSemThread;
