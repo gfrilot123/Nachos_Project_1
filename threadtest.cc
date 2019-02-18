@@ -366,6 +366,13 @@ int goal;
 bool wait=false;
 Thread *globalThread= new  Thread("Array Fork");
 Thread **mb;
+Thread **totalReaders;
+Thread *totalWriter=new Thread("Writer CS Lewis");
+Semaphore *area = new Semaphore ("Literature Arena",10);
+const int thisMany=10;
+Semaphore *writeArea= new Semaphore("Writing Arena",1);
+int currCount=0;
+char input;
 //************MAILBOX STRUCT DEFINED HERE
 typedef struct Mailbox
 {
@@ -395,7 +402,8 @@ void constructMailBox(int numberOfMailboxes);
 void enterPostOffice(int howmany);
 void actionTime(int forkEntrance);
 void readingTime(int messagesToRead);
-
+void beginReading_Writing(int now);
+void Readers_And_Writers();
 //****************MAILBOX POINTER
 struct Mailbox **mailboxPointer;
 
@@ -561,6 +569,61 @@ waits:
       {currentThread->Yield();}
 	wait=false;
       }
+	Readers_And_Writers();
+  }
+// Creates an array of threads for all readers then forks next method
+  void
+  Readers_And_Writers()
+  {
+    cout<<"THIS IS THE BONUS PORTION OF THE PROJECT!\n";
+    cout<<"THIS INCLUDES 10 READERS, 1 WRITER, AND 100 SESSIONS \n";
+    cout<<"SELECT ANY KEY FOLLOWED BY <ENTER> TO CONTINUE \n";
+    cin>>input;
+    for(int i=0; i<10; i++)
+    {
+      totalReaders=new Thread*[thisMany];
+    }
+    char ids[thisMany];
+
+    for(int j=0; j<10; j++)
+    {
+      ids[j]=(char)j;
+      totalReaders[j]=new Thread(ids);
+
+    }
+    totalWriter->Fork(beginReading_Writing,thisMany);
+
+    }
+    //Utilized two semaphores to control the flow of logic between
+    //readers and writers writeArea-P() semaphore  allows  only 1st 10
+    // reader entrance and departures with a demand from writer.
+    // A writeArea()->V() gives writer 1 iteration and the outer loop
+    // Inits the writeArea sem back to P() for next 10 sequences.
+  void
+  beginReading_Writing(int now)
+  {
+
+    while (currCount < thisMany * 10)
+    {
+      for(int k=0;k<10;k++)
+      {
+
+      area->P();
+      cout<<"Reader "<<(int)totalReaders[k]<<" has entered the reading area and semaphore P() enabled on index "<<k<<" \n";
+      cout<<"****Reader "<<(int)totalReaders[k]<< " is leaving the reading area and "
+      <<"semaphore V() disabled on index "<<k<<" \n";
+      area->V();
+      currCount++;
+      }
+      cout<<"\n";
+      writeArea->V();
+      cout<<totalWriter->getName()<<" has entered the writing area!  \n";
+      cout<<totalWriter->getName()<< " is leaving the writing area and "
+      <<"semaphore P() enabled for readers entrance.\n\n";
+
+  }
+  cout<<"\nTotal reader writer sessions => "<<currCount<<" \n\n";
+
   }
 //*****************     AUTHOR: GERALD FRILOT - END CODE *********************************
 
